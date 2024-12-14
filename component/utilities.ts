@@ -20,25 +20,52 @@ export type HWB = {
     b: number
 }
 
-export type Answer = {
+export type COLORSET = {
     rgb: RGB,
     hsl: HSL,
     hwb: HWB,
     hex: string
 }
 
+export type COLORDATA = {
+    low: number,
+    high: number,
+    step: number,
+}
+
+export const defaultColorset: COLORSET = {
+    rgb: { r: 128, g: 128, b: 128 },
+    hsl: { h: 0.6, s: 0, l: 0.5 },
+    hwb: { h: 0.6, w: 0.5, b: 0.5 },
+    hex: "#808080"
+}
+
 /* */
 
-export const createAnswer = (rgb: RGB): Answer => {
+export const getRanges = (color: COLOR): COLORDATA => {
+    if ("r" in color) {
+        return <COLORDATA>{ low: 0, high: 255, step: 1 }
+    } else {
+        return <COLORDATA>{ low: 0, high: 1, step: 0.01 }
+    }
+}
+
+export const createAnswer = (rgb: RGB): COLORSET => {
     const hsl = rgbToHsl(rgb)
     const hwb = rgbToHwb(rgb)
     const hex = rgbaToHex(rgb)
-    return <Answer>{ rgb: rgb, hsl: hsl, hwb: hwb, hex: hex }
+    return <COLORSET>{ rgb: rgb, hsl: hsl, hwb: hwb, hex: hex }
+}
+
+export const invertedHslHex = (hsl: HSL) => {
+    hsl.h = 1 - hsl.h
+    hsl.l > 0.5 ? hsl.l = 0.2 : hsl.l = 0.8
+    return hslToHex(hsl)
 }
 
 /* COLOR GENERATION */
 
-export function randomColor(start: number, end: number): RGB {
+export function randomColor(start = 0, end = 255): RGB {
     return <RGB>{ r: randomColorDigit(start, end), g: randomColorDigit(start, end), b: randomColorDigit(start, end) }
 }
 
@@ -88,6 +115,13 @@ const hashToRGB = (hash: number): RGB => {
 };
 
 /* CONVERTERS */
+// HSL -> HEX
+
+export const hslToHex = (hsl: HSL) => {
+    let rgb = hslToRgb(hsl)
+    return rgbaToHex(rgb)
+}
+
 //RGB <-> HSL
 
 export const rgbToHsl = (color: RGB): HSL => { // https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
@@ -141,8 +175,11 @@ const hueToRgb = (p: number, q: number, t: number) => {
 
 //RGB <-> HEX
 
+const toHex = (n: number): string => {
+    return n.toString(16).padStart(2, '0')
+}
+
 export function rgbaToHex(c: RGB): string {
-    const toHex = (n: number) => n.toString(16).padStart(2, '0');
     const rHex = toHex(c.r);
     const gHex = toHex(c.g);
     const bHex = toHex(c.b);

@@ -1,18 +1,29 @@
-import React, { useState, CSSProperties } from 'react'
-import { Text, View, StyleSheet } from "react-native";
-import type { COLOR, RGB, HSL, HWB, Answer } from '../component/utilities';
-import { createAnswer, getColorFromDate, randomColor } from '../component/utilities';
+import React, { useState } from 'react'
+import { View, StyleSheet, ScrollView } from "react-native";
+import type { COLORSET } from '@/component/utilities';
+import { createAnswer, getColorFromDate, defaultColorset } from '@/component/utilities';
+import Menu from "@/component/Menu"
+import Swatch from "@/component/Swatch"
+import Controls from '@/component/Controls';
 
 export default function Index() {
   const dateColor = getColorFromDate(new Date())
-  const [answer, setAnswer] = useState<Answer>(createAnswer(dateColor))
-  const swatchColor = {
-    backgroundColor: answer.hex
-  }
+  const [guessNum, setGuessNum] = useState(0)
+  const [answer, setAnswer] = useState<COLORSET>(createAnswer(dateColor))
+  const [guess, setGuess] = useState<COLORSET>(defaultColorset)
 
   return (
     <View style={styles.container}>
-      <View style={[styles.swatch, swatchColor]} />
+      <View style={styles.sticky}>
+        <Menu setAnswer={setAnswer} />
+        <View style={styles.swatchContainer}>
+          <Swatch color={answer} label="target" />
+          <Swatch color={guess} label="guess" />
+        </View>
+      </View>
+      <View style={styles.controlsContainer}>
+        <Controls guess={guess} setGuess={setGuess} type={"rgb"} />
+      </View>
     </View>
   );
 }
@@ -20,11 +31,15 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
   },
-  swatch: {
-    width: 100,
-    height: 100,
+  sticky: {
+    flex: 1,
+  },
+  controlsContainer: {
+    flex: 2,
+  },
+  swatchContainer: {
+    flex: 1,
+    flexDirection: 'row'
   }
 })
